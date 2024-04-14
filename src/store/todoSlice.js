@@ -2,10 +2,19 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 export const fetchTodos = createAsyncThunk(
   "todos/fetchTodos",
-  async function () {
-    const response = await fetch("https://jsonplaceholder.typicode.com/todos?_limit=10");
-    const data = await response.json();
-    return data;
+  async function (_, { rejectWithValue }) {//принимает первым параметром то что передаем через диспатч, но мы тут ничего не передаем
+    try {
+      const response = await fetch(
+        "https://jsonplaceholder.typicode.com/todos?_limit=10"
+      );
+      if (!response.ok) {
+        throw new Error("Server error");
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message);//таким образом мы ловим ошибку и перекидываем ее в экстраредьюсер по обработке ошибки
+    }
   }
 ); //принимает название экшена и функцию
 
@@ -45,19 +54,11 @@ const todoSlice = createSlice({
       state.status = "resolved";
       state.todos = action.payload;
     });
+    builder.addCase(fetchTodos.rejected, (state, action) => {
+      state.status = 'rejected';
+      state.error = action.payload;
+    });
   }
-
-  /* {
-    [fetchTodos.pending] : (state, action) => {
-      state.status = 'loading';
-      state.error = null;
-    },
-    [fetchTodos.fulfilled] : (state, action) => {
-      state.status = 'resolved';
-      state.todos = action.payload;
-    },
-    [fetchTodos.rejected] : (state, action) => {},
-  }, */
 });
 
 export const { addTodo, removeTodo, toggleTodoComplete } = todoSlice.actions;
