@@ -80,6 +80,18 @@ export const toggleStatus = createAsyncThunk(
     }
   }
 );
+/*-----------------------бавление новых данных---------------------------------------------------------*/
+export const addNewTodo = createAsyncThunk(
+  'todos/addNewTodo',
+  async function(text, rejectWithValue,dispatch) {
+    try {
+      
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
+  }
+)
+
 /*-------------------------------------------------------------------------------------------------------------------------*/
 const todoSlice = createSlice({
   name: "todos",
