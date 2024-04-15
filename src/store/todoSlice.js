@@ -34,7 +34,7 @@ export const deleteTodo = createAsyncThunk(
           method: "DELETE"
         }
       );
-      console.log(response);
+      //console.log(response);
       if (!response.ok) {
         throw new Error("Can't delete task. Server error");
       }
@@ -82,15 +82,36 @@ export const toggleStatus = createAsyncThunk(
 );
 /*-----------------------бавление новых данных---------------------------------------------------------*/
 export const addNewTodo = createAsyncThunk(
-  'todos/addNewTodo',
-  async function(text, rejectWithValue,dispatch) {
+  "todos/addNewTodo",
+  async function (text, { rejectWithValue, dispatch }) {
     try {
-      
+      const todo = {
+        title: text,
+        userId: 1,
+        completed: false
+      };
+      const response = await fetch(
+        "https://jsonplaceholder.typicode.com/todos",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(todo)
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Can't add task. Server Error");
+      }
+
+      const data = await response.json();
+      console.log(data);
+      dispatch(addTodo(data));
     } catch (error) {
-      return rejectWithValue(error.message)
+      return rejectWithValue(error.message);
     }
   }
-)
+);
 
 /*-------------------------------------------------------------------------------------------------------------------------*/
 const todoSlice = createSlice({
@@ -102,11 +123,12 @@ const todoSlice = createSlice({
   },
   reducers: {
     addTodo(state, action) {
-      state.todos.push({
+      /* state.todos.push({
         id: new Date().toISOString(),
         text: action.payload.text,
         completed: false
-      });
+      }); */
+      state.todos.push(action.payload);
     },
 
     removeTodo(state, action) {
@@ -132,9 +154,18 @@ const todoSlice = createSlice({
     builder.addCase(fetchTodos.rejected, setError);
     builder.addCase(deleteTodo.rejected, setError);
     builder.addCase(toggleStatus.rejected, setError);
+    builder.addCase(addNewTodo.rejected, setError);
     //можно сделать так чтобы сообщение об ошибке стиралось с экрана в случае пендинга
   }
 });
 
 export const { addTodo, removeTodo, toggleTodoComplete } = todoSlice.actions;
 export default todoSlice.reducer;
+
+//в данном случае использовал синхронные методы для обновления ui. можно было бы вместо addTodo и др сделать по-другому:
+//изменять статус в экстраредьюсерах так,как это делаю с fetchTodos
+//на статус filfilled изменять статус, очищать ошибку и делать state.todos.push(action.payload);
+
+//так же в данном случае реакт будет рукаться на одинаковые key в списках про добавлении тасок
+//так как сервак возвращает всем таскам одинаковый id
+//на практике id присваивается на сервакеб этот механизм здесь не реализован

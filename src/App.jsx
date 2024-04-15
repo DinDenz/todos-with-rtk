@@ -3,7 +3,8 @@ import "./App.css";
 import TodoList from "./components/TodoList";
 import InputField from "./components/InputField";
 import { useDispatch, useSelector } from "react-redux";
-import { addTodo, fetchTodos } from "./store/todoSlice";
+import { fetchTodos } from "./store/todoSlice";
+import { addNewTodo } from "./store/todoSlice";
 
 function App() {
   const [text, setText] = useState("");
@@ -11,7 +12,8 @@ function App() {
   const { status, error } = useSelector((state) => state.todos); //здесь мы получили объект из среза и деструктурировали статус и ошибку
 
   const addTask = () => {
-    dispatch(addTodo({ text }));
+    //dispatch(addTodo({ text }));
+    dispatch(addNewTodo(text));
     setText("");
   };
 
